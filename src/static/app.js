@@ -524,13 +524,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const shareUrl = window.location.href.split("#")[0].split("?")[0];
     const encodedText = encodeURIComponent(shareText);
     const encodedUrl = encodeURIComponent(shareUrl);
+    const shareMenuId = `share-menu-${name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "")}`;
     const shareHtml = `
       <div class="share-container">
-        <button class="share-button tooltip" data-activity="${name}" aria-label="Share this activity">
+        <button class="share-button tooltip" data-activity="${name}" aria-label="Share this activity" aria-expanded="false" aria-controls="${shareMenuId}">
           📤 Share
           <span class="tooltip-text">Share this activity with friends</span>
         </button>
-        <div class="share-menu hidden">
+        <div class="share-menu hidden" id="${shareMenuId}">
           <a class="share-option" target="_blank" rel="noopener noreferrer"
              href="https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}">
             🐦 X (Twitter)
@@ -627,6 +631,7 @@ document.addEventListener("DOMContentLoaded", () => {
       closeAllShareMenus();
       if (!isOpen) {
         shareMenu.classList.remove("hidden");
+        shareButton.setAttribute("aria-expanded", "true");
       }
     });
 
@@ -637,6 +642,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const textToCopy = `${copyLinkButton.dataset.shareText} ${copyLinkButton.dataset.shareUrl}`;
       copyShareLink(textToCopy);
       shareMenu.classList.add("hidden");
+      shareButton.setAttribute("aria-expanded", "false");
     });
 
     // Add click handler for register button (only when authenticated)
@@ -818,6 +824,12 @@ document.addEventListener("DOMContentLoaded", () => {
   function closeAllShareMenus() {
     document.querySelectorAll(".share-menu").forEach((menu) => {
       menu.classList.add("hidden");
+      const relatedButton = document.querySelector(
+        `.share-button[aria-controls="${menu.id}"]`
+      );
+      if (relatedButton) {
+        relatedButton.setAttribute("aria-expanded", "false");
+      }
     });
   }
 
