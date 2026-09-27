@@ -25,6 +25,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeLoginModal = document.querySelector(".close-login-modal");
   const loginMessage = document.getElementById("login-message");
 
+  // Theme toggle elements
+  const themeToggle = document.getElementById("theme-toggle");
+  const themeIcon = document.getElementById("theme-icon");
+
   // Activity categories with corresponding colors
   const activityTypes = {
     sports: { label: "Sports", color: "#e8f5e9", textColor: "#2e7d32" },
@@ -97,6 +101,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
     fetchActivities();
   }
+
+  // Apply the given theme ("dark" or "light") to the page
+  function applyTheme(theme) {
+    if (theme === "dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+      themeIcon.textContent = "☀️";
+    } else {
+      document.documentElement.removeAttribute("data-theme");
+      themeIcon.textContent = "🌙";
+    }
+  }
+
+  // Load saved theme preference (or default to light) and apply it
+  function initTheme() {
+    const savedTheme = localStorage.getItem("theme") || "light";
+    applyTheme(savedTheme);
+  }
+
+  // Switch between dark and light mode and remember the choice
+  function toggleTheme() {
+    const isDark =
+      document.documentElement.getAttribute("data-theme") === "dark";
+    const newTheme = isDark ? "light" : "dark";
+    applyTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+  }
+
+  themeToggle.addEventListener("click", toggleTheme);
 
   // Check if user is already logged in (from localStorage)
   function checkAuthentication() {
@@ -862,6 +894,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // Initialize app
+  initTheme();
   checkAuthentication();
   initializeFilters();
   fetchActivities();
