@@ -524,18 +524,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const shareUrl = window.location.href.split("#")[0].split("?")[0];
     const encodedText = encodeURIComponent(shareText);
     const encodedUrl = encodeURIComponent(shareUrl);
-    const escapedShareText = shareText
-      .replace(/&/g, "&amp;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
-    const escapedShareUrl = shareUrl
-      .replace(/&/g, "&amp;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
+    const escapeAttributeValue = (value) =>
+      value
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    const escapedShareText = escapeAttributeValue(shareText);
+    const escapedShareUrl = escapeAttributeValue(shareUrl);
     const shareMenuId = `share-menu-${name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
