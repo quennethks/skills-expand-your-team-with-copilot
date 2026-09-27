@@ -519,6 +519,46 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
     `;
 
+    // Build the share menu (social sharing buttons)
+    const shareText = `Check out "${name}" at Mergington High School! ${details.description} Schedule: ${formattedSchedule}`;
+    const shareUrl = window.location.href.split("#")[0].split("?")[0];
+    const encodedText = encodeURIComponent(shareText);
+    const encodedUrl = encodeURIComponent(shareUrl);
+    const shareHtml = `
+      <div class="share-container">
+        <button class="share-button tooltip" data-activity="${name}" aria-label="Share this activity">
+          📤 Share
+          <span class="tooltip-text">Share this activity with friends</span>
+        </button>
+        <div class="share-menu hidden">
+          <a class="share-option" target="_blank" rel="noopener noreferrer"
+             href="https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}">
+            🐦 X (Twitter)
+          </a>
+          <a class="share-option" target="_blank" rel="noopener noreferrer"
+             href="https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}">
+            📘 Facebook
+          </a>
+          <a class="share-option" target="_blank" rel="noopener noreferrer"
+             href="https://api.whatsapp.com/send?text=${encodedText}%20${encodedUrl}">
+            💬 WhatsApp
+          </a>
+          <a class="share-option"
+             href="mailto:?subject=${encodeURIComponent(
+               `Join me for ${name}!`
+             )}&body=${encodedText}%20${encodedUrl}">
+            ✉️ Email
+          </a>
+          <button type="button" class="share-option copy-link-button" data-share-text="${shareText.replace(
+            /"/g,
+            "&quot;"
+          )}" data-share-url="${shareUrl}">
+            🔗 Copy Link
+          </button>
+        </div>
+      </div>
+    `;
+
     activityCard.innerHTML = `
       ${tagHtml}
       <h4>${name}</h4>
@@ -527,6 +567,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <strong>Schedule:</strong> ${formattedSchedule}
         <span class="tooltip-text">Regular meetings at this time throughout the semester</span>
       </p>
+      ${shareHtml}
       ${capacityIndicator}
       <div class="participants-list">
         <h5>Current Participants:</h5>
@@ -575,6 +616,27 @@ document.addEventListener("DOMContentLoaded", () => {
     const deleteButtons = activityCard.querySelectorAll(".delete-participant");
     deleteButtons.forEach((button) => {
       button.addEventListener("click", handleUnregister);
+    });
+
+    // Add click handler for the share button to toggle the share menu
+    const shareButton = activityCard.querySelector(".share-button");
+    const shareMenu = activityCard.querySelector(".share-menu");
+    shareButton.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const isOpen = !shareMenu.classList.contains("hidden");
+      closeAllShareMenus();
+      if (!isOpen) {
+        shareMenu.classList.remove("hidden");
+      }
+    });
+
+    // Add click handler for the copy-link share option
+    const copyLinkButton = activityCard.querySelector(".copy-link-button");
+    copyLinkButton.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const textToCopy = `${copyLinkButton.dataset.shareText} ${copyLinkButton.dataset.shareUrl}`;
+      copyShareLink(textToCopy);
+      shareMenu.classList.add("hidden");
     });
 
     // Add click handler for register button (only when authenticated)
@@ -751,6 +813,34 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+
+  // Close every open share menu (used before opening a new one)
+  function closeAllShareMenus() {
+    document.querySelectorAll(".share-menu").forEach((menu) => {
+      menu.classList.add("hidden");
+    });
+  }
+
+  // Copy the share text/link to the clipboard and let the user know it worked
+  function copyShareLink(textToCopy) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard
+        .writeText(textToCopy)
+        .then(() => {
+          showMessage("Link copied! You can now paste it to share.", "success");
+        })
+        .catch(() => {
+          showMessage("Could not copy the link. Please try again.", "error");
+        });
+    } else {
+      showMessage("Copying isn't supported on this browser.", "error");
+    }
+  }
+
+  // Close any open share menu when clicking anywhere else on the page
+  document.addEventListener("click", () => {
+    closeAllShareMenus();
+  });
 
   // Handle unregistration with confirmation
   async function handleUnregister(event) {
