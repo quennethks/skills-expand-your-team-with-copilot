@@ -467,13 +467,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Display filtered activities
-    Object.entries(filteredActivities).forEach(([name, details]) => {
-      renderActivityCard(name, details);
+    Object.entries(filteredActivities).forEach(([name, details], index) => {
+      renderActivityCard(name, details, index);
     });
   }
 
   // Function to render a single activity card
-  function renderActivityCard(name, details) {
+  function renderActivityCard(name, details, cardIndex) {
     const activityCard = document.createElement("div");
     activityCard.className = "activity-card";
 
@@ -524,10 +524,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const shareUrl = window.location.href.split("#")[0].split("?")[0];
     const encodedText = encodeURIComponent(shareText);
     const encodedUrl = encodeURIComponent(shareUrl);
+    const escapedShareText = shareText
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+    const escapedShareUrl = shareUrl
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
     const shareMenuId = `share-menu-${name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "")}`;
+      .replace(/(^-|-$)/g, "")}-${cardIndex}`;
     const shareHtml = `
       <div class="share-container">
         <button class="share-button tooltip" data-activity="${name}" aria-label="Share this activity" aria-expanded="false" aria-controls="${shareMenuId}">
@@ -553,10 +565,7 @@ document.addEventListener("DOMContentLoaded", () => {
              )}&body=${encodedText}%20${encodedUrl}">
             ✉️ Email
           </a>
-          <button type="button" class="share-option copy-link-button" data-share-text="${shareText.replace(
-            /"/g,
-            "&quot;"
-          )}" data-share-url="${shareUrl}">
+          <button type="button" class="share-option copy-link-button" data-share-text="${escapedShareText}" data-share-url="${escapedShareUrl}">
             🔗 Copy Link
           </button>
         </div>
@@ -631,6 +640,7 @@ document.addEventListener("DOMContentLoaded", () => {
       closeAllShareMenus();
       if (!isOpen) {
         shareMenu.classList.remove("hidden");
+        activityCard.classList.add("share-menu-open");
         shareButton.setAttribute("aria-expanded", "true");
       }
     });
@@ -824,6 +834,10 @@ document.addEventListener("DOMContentLoaded", () => {
   function closeAllShareMenus() {
     document.querySelectorAll(".share-menu").forEach((menu) => {
       menu.classList.add("hidden");
+      const parentCard = menu.closest(".activity-card");
+      if (parentCard) {
+        parentCard.classList.remove("share-menu-open");
+      }
       const relatedButton = document.querySelector(
         `.share-button[aria-controls="${menu.id}"]`
       );

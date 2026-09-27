@@ -159,8 +159,13 @@ section h3 {
   transition: all 0.3s ease;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
   position: relative;
-  overflow: visible;
+  overflow: hidden;
   font-size: 0.85rem;
+}
+
+.activity-card.share-menu-open {
+  overflow: visible;
+  z-index: 6;
 }
 
 .activity-card:hover {
